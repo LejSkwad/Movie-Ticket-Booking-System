@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+    # ==================== INFRASTRUCTURE ====================
+  redis:
+    image: redis:7-alpine
+    container_name: mtb-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:8
+    container_name: mtb-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: mtb-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - backend
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: mtb-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - redis
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend
+volumes:
+  mysql-data:
+
+networks:
+  backend:
+    driver: bridge

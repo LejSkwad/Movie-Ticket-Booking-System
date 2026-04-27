@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: auth-service
+            uri: lb://auth-service
+            predicates:
+              - Path=/api/auth/**
+
+          - id: user-service
+            uri: lb://user-service
+            predicates:
+              - Path=/api/users/**, /api/admin/users/**
+
+          - id: movie-service
+            uri: lb://movie-service
+            predicates:
+              - Path=/api/movies/**
+
+          - id: cinema-service
+            uri: lb://cinema-service
+            predicates:
+              - Path=/api/rooms/**, /api/seats/**, /api/showtimes/**, /api/admin/showtimes/**
+
+          - id: booking-service
+            uri: lb://booking-service
+            predicates:
+              - Path=/api/bookings/**
+
+          - id: payment-service
+            uri: lb://payment-service
+            predicates:
+              - Path=/api/payments/**
+
+eureka:
+  instance:
+    hostname: ${HOSTNAME:localhost}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-must-be-at-least-32-chars}

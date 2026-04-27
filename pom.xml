@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- =====================================================
+         PARENT: Spring Boot — kế thừa toàn bộ default config
+         ===================================================== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
+    <!-- =====================================================
+         IDENTITY của project cha
+         groupId   : tên tổ chức / project (như package gốc)
+         artifactId: tên module này
+         version   : version của toàn bộ hệ thống
+         packaging : pom = đây là project cha, không build thành .jar
+         ===================================================== -->
+    <groupId>com.mtb</groupId>
+    <artifactId>movie-ticket-booking</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <!-- =====================================================
+         MODULES: danh sách các service con
+         Maven sẽ build theo thứ tự này
+         ===================================================== -->
+    <modules>
+        <module>eureka-server</module>
+        <module>api-gateway</module>
+        <module>user-service</module>
+    </modules>
+
+    <!-- =====================================================
+         PROPERTIES: khai báo version 1 lần, dùng ở nhiều chỗ
+         ===================================================== -->
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.32</lombok.version>
+        <jjwt.version>0.12.5</jjwt.version>
+    </properties>
+
+    <!-- =====================================================
+         DEPENDENCY MANAGEMENT: khai báo version tập trung
+         Các module con dùng dependency này không cần ghi version
+         ===================================================== -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud BOM — quản lý version cho toàn bộ Spring Cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- JWT library -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- =====================================================
+         DEPENDENCIES: dependency dùng CHUNG ở tất cả service
+         Lombok giảm boilerplate (getter/setter/constructor)
+         ===================================================== -->
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- =====================================================
+         BUILD: cấu hình Maven compiler dùng Java 17
+         ===================================================== -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
