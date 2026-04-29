@@ -1,4 +1,4 @@
-package com.mtb.apigateway.Util;
+package com.mtb.apigateway.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

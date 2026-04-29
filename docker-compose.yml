@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
     # ==================== INFRASTRUCTURE ====================
   redis:
@@ -11,12 +9,11 @@ services:
       - backend
 
   mysql:
-    image: mysql:8
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     container_name: mtb-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -46,6 +43,37 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend
+
+  auth-service:
+    build: ./auth-service
+    container_name: mtb-auth
+    depends_on:
+      - eureka-server
+      - redis
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+    networks:
+      - backend
+
+  user-service:
+    build: ./user-service
+    container_name: mtb-user
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=mtb_users
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     networks:
       - backend
 volumes:

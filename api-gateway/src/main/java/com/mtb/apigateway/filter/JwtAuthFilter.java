@@ -1,7 +1,7 @@
-package com.mtb.apigateway.Filter;
+package com.mtb.apigateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mtb.apigateway.Util.JwtUtil;
+import com.mtb.apigateway.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
