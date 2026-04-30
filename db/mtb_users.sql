@@ -19,9 +19,9 @@ CREATE TABLE users (
 
 -- Seed data (password plaintext = "123456")
 INSERT INTO users (email, password, full_name, role, is_active) VALUES
-('admin@cinema.com',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Admin Cinema',   'ADMIN',    true),
-('nguyen@gmail.com',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Nguyễn Văn A',   'CUSTOMER', true),
-('tran@gmail.com',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Trần Thị B',     'CUSTOMER', true),
-('le@gmail.com',        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Lê Văn C',       'CUSTOMER', true),
-('pham@gmail.com',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Phạm Thị D',     'CUSTOMER', false),
-('hoang@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Hoàng Văn E',    'CUSTOMER', false);
+('admin@cinema.com',    '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Admin Cinema',   'ADMIN',    true),
+('nguyen@gmail.com',    '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Nguyễn Văn A',   'CUSTOMER', true),
+('tran@gmail.com',      '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Trần Thị B',     'CUSTOMER', true),
+('le@gmail.com',        '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Lê Văn C',       'CUSTOMER', true),
+('pham@gmail.com',      '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Phạm Thị D',     'CUSTOMER', false),
+('hoang@gmail.com',     '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Hoàng Văn E',    'CUSTOMER', false);

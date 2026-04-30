@@ -1,15 +1,10 @@
 package com.mtb.userservice.service;
 
-import com.mtb.userservice.dto.request.CreateUserRequest;
-import com.mtb.userservice.dto.request.SearchUserRequest;
-import com.mtb.userservice.dto.request.ValidateCredentialsRequest;
+import com.mtb.userservice.dto.request.*;
 import com.mtb.userservice.dto.response.UserResponse;
 import com.mtb.userservice.entity.Role;
 import com.mtb.userservice.entity.User;
-import com.mtb.userservice.exception.EmailAlreadyExistException;
-import com.mtb.userservice.exception.InvalidCredentialsException;
-import com.mtb.userservice.exception.UserBannedException;
-import com.mtb.userservice.exception.UserNotFoundException;
+import com.mtb.userservice.exception.*;
 import com.mtb.userservice.mapper.UserMapper;
 import com.mtb.userservice.repository.UserRepository;
 import com.mtb.userservice.specification.UserSpecification;
@@ -35,8 +30,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getProfile(Long userId) {
-        User user = userRepository.findById(userId)
+    public UserResponse getProfile(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException());
 
         if(!user.getIsActive()){
@@ -44,6 +39,35 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long id, ChangePasswordRequest changePasswordRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        if(!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())){
+            throw new WrongPasswordException();
+        }
+
+        if(changePasswordRequest.getNewPassword().equals(changePasswordRequest.getOldPassword())){
+            throw new RuntimeException("Mật khẩu mới không được trùng mật khẩu cũ");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(Long id, UpdateUserRequest updateUserRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        user.setFullName(updateUserRequest.getFullName());
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     //================================== ADMIN =========================================
@@ -68,6 +92,34 @@ public class UserServiceImpl implements UserService {
         Page<UserResponse> responsePage = users.map(userMapper::toResponse);
 
         return responsePage;
+    }
+
+    @Override
+    public UserResponse getUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse lockAccount(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+        user.setIsActive(false);
+
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public UserResponse unlockAccount(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+        user.setIsActive(true);
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     //=================================== INTERNAL ===========================================

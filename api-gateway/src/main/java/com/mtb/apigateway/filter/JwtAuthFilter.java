@@ -18,6 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -67,12 +69,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String userId = claims.getSubject();
             String role = claims.get("role", String.class);
 
+
+            // Thêm userId - userRole vào Header
+            // Override cả 3 method đọc Header của HttpServletRequest
             HttpServletRequestWrapper mutated = new HttpServletRequestWrapper(request) {
                 @Override
                 public String getHeader(String name) {
                     if ("X-User-Id".equalsIgnoreCase(name)) return userId;
                     if ("X-User-Role".equalsIgnoreCase(name)) return role;
                     return super.getHeader(name);
+                }
+
+                @Override
+                public Enumeration<String> getHeaders(String name) {
+                    if ("X-User-Id".equalsIgnoreCase(name))
+                        return Collections.enumeration(List.of(userId));
+                    if ("X-User-Role".equalsIgnoreCase(name))
+                        return Collections.enumeration(List.of(role));
+                    return super.getHeaders(name);
+                }
+
+                @Override
+                public Enumeration<String> getHeaderNames() {
+                    List<String> names = Collections.list(super.getHeaderNames());
+                    names.add("X-User-Id");
+                    names.add("X-User-Role");
+                    return Collections.enumeration(names);
                 }
             };
 
