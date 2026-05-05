@@ -17,7 +17,6 @@ CREATE TABLE users (
     UNIQUE KEY uk_email (email)
 );
 
--- Seed data (password plaintext = "123456")
 INSERT INTO users (email, password, full_name, role, is_active) VALUES
 ('admin@cinema.com',    '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Admin Cinema',   'ADMIN',    true),
 ('nguyen@gmail.com',    '$2a$10$Pg4c7wvCyUUJCWSOiK4vneAOkiGwYsN9WU1tMqjW1CTTgDKLoWtge', 'Nguyễn Văn A',   'CUSTOMER', true),
