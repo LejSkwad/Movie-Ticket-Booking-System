@@ -1,5 +1,6 @@
 package com.mtb.movieservice.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class CreateMovieRequest {
 
     private String director;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate releaseDate;
 
     private String description;

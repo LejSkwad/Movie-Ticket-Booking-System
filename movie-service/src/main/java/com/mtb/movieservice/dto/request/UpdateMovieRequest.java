@@ -1,6 +1,7 @@
 package com.mtb.movieservice.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class UpdateMovieRequest {
 
     private String director;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate releaseDate;
 
     private String description;

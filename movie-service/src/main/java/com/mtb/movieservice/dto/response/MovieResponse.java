@@ -1,5 +1,6 @@
 package com.mtb.movieservice.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class MovieResponse {
     String rated;
     String status;
     List<GenreResponse> genres;
+    @JsonFormat(pattern = "dd/MM/yyyy")
     LocalDate releaseDate;
 
 }

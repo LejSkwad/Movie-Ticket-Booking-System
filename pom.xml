@@ -38,6 +38,7 @@
         <module>user-service</module>
         <module>auth-service</module>
         <module>movie-service</module>
+        <module>cinema-service</module>
     </modules>
 
     <!-- =====================================================

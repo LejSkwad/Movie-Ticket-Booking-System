@@ -112,4 +112,13 @@ public class MovieServiceImpl implements MovieService {
 
         return movieMapper.toResponse(movieRepository.save(movie));
     }
+
+    //==================== INTERNAL =====================
+
+    @Override
+    public List<MovieResponse> getMoviesByIds(List<Long> ids) {
+        List<Movie> movies = movieRepository.findAllById(ids);
+
+        return movies.stream().map(movieMapper::toResponse).collect(Collectors.toList());
+    }
 }

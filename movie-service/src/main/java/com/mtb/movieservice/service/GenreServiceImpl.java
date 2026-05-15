@@ -48,6 +48,7 @@ public class GenreServiceImpl implements GenreService {
     public void deleteGenre(Long id) {
         Genre genre = genreRepository.findById(id)
                 .orElseThrow(() -> new GenreNotFoundException());
+        genreRepository.removeMovieGenresByGenreId(id);
         genreRepository.delete(genre);
     }
 }

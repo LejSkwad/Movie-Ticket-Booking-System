@@ -72,4 +72,10 @@ public class MovieController {
     public ResponseEntity<ApiResponse<MovieResponse>> deleteMovie(@PathVariable Long id){
         return ResponseEntity.ok(ApiResponse.ok(movieService.deleteMovie(id)));
     }
+
+    //==================== INTERNAL ==========================
+    @GetMapping("/internal/movies")
+    public ResponseEntity<List<MovieResponse>> getMoviesByIds(@RequestParam List<Long> ids){
+        return ResponseEntity.ok(movieService.getMoviesByIds(ids));
+    }
 }

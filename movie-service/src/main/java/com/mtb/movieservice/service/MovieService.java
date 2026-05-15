@@ -19,4 +19,7 @@ public interface MovieService {
     MovieResponse createMovie(CreateMovieRequest createMovieRequest);
     MovieResponse updateMovie(Long id, UpdateMovieRequest updateMovieRequest);
     MovieResponse deleteMovie(Long id);
+
+    //====================== INTERNAL =========================
+    List<MovieResponse> getMoviesByIds(List<Long> ids);
 }
