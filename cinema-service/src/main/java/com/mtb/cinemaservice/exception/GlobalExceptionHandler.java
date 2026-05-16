@@ -27,4 +27,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(), "INVALID_SHOWTIME", e.getMessage(), request.getRequestURI()));
     }
+
+    @ExceptionHandler(ShowTimeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleShowTimeNotFoundException(ShowTimeNotFoundException e, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(), "SHOWTIME_NOT_FOUND", e.getMessage(), request.getRequestURI()));
+    }
 }

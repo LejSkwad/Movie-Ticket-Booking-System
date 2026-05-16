@@ -117,7 +117,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<MovieResponse> getMoviesByIds(List<Long> ids) {
-        List<Movie> movies = movieRepository.findAllById(ids);
+        List<Movie> movies = movieRepository.findAllWithGenresByIds(ids);
 
         return movies.stream().map(movieMapper::toResponse).collect(Collectors.toList());
     }

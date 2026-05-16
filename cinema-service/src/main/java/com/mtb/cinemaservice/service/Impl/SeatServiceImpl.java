@@ -1,7 +1,6 @@
 package com.mtb.cinemaservice.service.Impl;
 
 import com.mtb.cinemaservice.dto.response.SeatResponse;
-import com.mtb.cinemaservice.entity.Seat;
 import com.mtb.cinemaservice.entity.SeatPriceConfig;
 import com.mtb.cinemaservice.entity.SeatType;
 import com.mtb.cinemaservice.mapper.SeatMapper;
@@ -21,7 +20,9 @@ public class SeatServiceImpl implements SeatService {
     private final SeatPriceConfigRepository seatPriceConfigRepository;
     private final SeatMapper seatMapper;
 
-    public SeatServiceImpl(SeatRepository seatRepository, SeatPriceConfigRepository seatPriceConfigRepository, SeatMapper seatMapper) {
+    public SeatServiceImpl(SeatRepository seatRepository,
+                           SeatPriceConfigRepository seatPriceConfigRepository,
+                           SeatMapper seatMapper) {
         this.seatRepository = seatRepository;
         this.seatPriceConfigRepository = seatPriceConfigRepository;
         this.seatMapper = seatMapper;
@@ -31,16 +32,15 @@ public class SeatServiceImpl implements SeatService {
     public List<SeatResponse> getSeatsByRoomId(Long roomId) {
         Map<SeatType, BigDecimal> priceMap = seatPriceConfigRepository.findAll()
                 .stream()
-                .collect(Collectors.toMap(SeatPriceConfig::getSeatType,
-                                          SeatPriceConfig::getPrice));
-        List<Seat> seats = seatRepository.findAllByRoomIdOrderByRowLabelAscColNumberAsc(roomId);
-        List<SeatResponse> seatResponses = seats.stream().map(seat -> {
-            SeatResponse seatResponse = seatMapper.toResponse(seat);
-            seatResponse.setPrice(priceMap.get(seat.getType()));
-            return seatResponse;
-        })
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(SeatPriceConfig::getSeatType, SeatPriceConfig::getPrice));
 
-        return seatResponses;
+        return seatRepository.findAllByRoomIdOrderByRowLabelAscColNumberAsc(roomId)
+                .stream()
+                .map(seat -> {
+                    SeatResponse seatResponse = seatMapper.toResponse(seat);
+                    seatResponse.setPrice(priceMap.get(seat.getType()));
+                    return seatResponse;
+                })
+                .collect(Collectors.toList());
     }
 }

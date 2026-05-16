@@ -2,13 +2,15 @@ package com.mtb.cinemaservice.service.Impl;
 
 import com.mtb.cinemaservice.client.MovieClient;
 import com.mtb.cinemaservice.dto.request.CreateShowTimeRequest;
+import com.mtb.cinemaservice.dto.request.GetUpComingShowTimeRequest;
 import com.mtb.cinemaservice.dto.response.MovieInfo;
+import com.mtb.cinemaservice.dto.response.ShowTimeCustomerResponse;
 import com.mtb.cinemaservice.dto.response.ShowTimeResponse;
 import com.mtb.cinemaservice.entity.*;
 import com.mtb.cinemaservice.exception.InvalidShowTimeException;
 import com.mtb.cinemaservice.exception.MovieNotFoundException;
 import com.mtb.cinemaservice.exception.RoomNotFoundException;
-import com.mtb.cinemaservice.exception.ShowTimeConflictException;
+import com.mtb.cinemaservice.exception.ShowTimeNotFoundException;
 import com.mtb.cinemaservice.mapper.ShowTimeMapper;
 import com.mtb.cinemaservice.mapper.ShowTimeSeatMapper;
 import com.mtb.cinemaservice.repository.RoomRepository;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,14 +57,17 @@ public class ShowTimeServiceImpl implements ShowTimeService {
     }
 
     @Override
-    public List<ShowTimeResponse> getUpcomingShowTimes(LocalDate date, Long movieId) {
-        return List.of();
+    public List<ShowTimeCustomerResponse> getUpcomingShowTimes(GetUpComingShowTimeRequest getUpComingShowTimeRequest) {
+        List<ShowTime> showTimes = showTimeRepository.findUpComingByMovieIdAndDate(getUpComingShowTimeRequest.getMovieId(),
+                                                                               getUpComingShowTimeRequest.getDate());
+
+        return showTimes.stream().map(showTimeMapper::toCustomerResponse).toList();
     }
 
     //======================== ADMIN ========================
     @Override
     public List<ShowTimeResponse> getShowTimesByDate(LocalDate date) {
-        List<ShowTime> showTimes = showTimeRepository.getAllByDate(date);
+        List<ShowTime> showTimes = showTimeRepository.findAllByDate(date);
 
         List<Long> movieIds = showTimes.stream().map(ShowTime::getMovieId).distinct().toList();
 
@@ -90,7 +96,7 @@ public class ShowTimeServiceImpl implements ShowTimeService {
                 .stream().findFirst()
                 .orElseThrow(() -> new MovieNotFoundException());
 
-        List<ShowTime> roomShowTimesInDateRange = showTimeRepository.getAllByRoomIdAndStartTimeBetween(createShowTimeRequest.getRoomId(),
+        List<ShowTime> roomShowTimesInDateRange = showTimeRepository.findAllByRoomIdAndStartTimeBetween(createShowTimeRequest.getRoomId(),
                 createShowTimeRequest.getStartDate().atStartOfDay(),
                 createShowTimeRequest.getEndDate().plusDays(1).atStartOfDay());
 
@@ -144,6 +150,29 @@ public class ShowTimeServiceImpl implements ShowTimeService {
         showTimeSeatRepository.saveAll(newShowTimeSeats);
 
         return saved.stream().map(s-> showTimeMapper.toResponse(s, movieInfo)).toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteShowTime(Long id) {
+        ShowTime showTime = showTimeRepository.findByIdWithSeats(id)
+                .orElseThrow(() -> new ShowTimeNotFoundException());
+
+        boolean hasBookedSeat = showTime.getShowTimeSeats().stream().anyMatch(s ->
+                s.getStatus().equals(ShowTimeSeatStatus.BOOKED));
+
+        long daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), showTime.getStartTime().toLocalDate());
+
+        if (hasBookedSeat) {
+            throw new InvalidShowTimeException("Không thể xóa suất chiếu đã có vé đặt");
+        }
+
+        if (daysUntil < 2) {
+            throw new InvalidShowTimeException("Chỉ có thể xóa suất chiếu trước khi chiếu 2 ngày");
+        }
+
+        showTimeSeatRepository.deleteAllByShowTimeId(id);
+        showTimeRepository.deleteById(id);
     }
 
     private static String computeStatus(ShowTime showTime, LocalDateTime now){
