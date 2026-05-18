@@ -148,7 +148,6 @@ public class ShowTimeServiceImpl implements ShowTimeService {
 
         List<ShowTime> saved = showTimeRepository.saveAll(newShowTimes);
         showTimeSeatRepository.saveAll(newShowTimeSeats);
-
         return saved.stream().map(s-> showTimeMapper.toResponse(s, movieInfo)).toList();
     }
 

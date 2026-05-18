@@ -496,3 +496,12 @@ INSERT INTO show_times (movie_id, room_id, format, start_time, end_time) VALUES
 INSERT INTO show_times (movie_id, room_id, format, start_time, end_time) VALUES
 (3, 10, 'FOUR_DX', '2026-05-15 11:00:00', '2026-05-15 13:25:00'),
 (1, 10, 'FOUR_DX', '2026-05-15 15:00:00', '2026-05-15 17:30:00');
+
+-- ============================================================
+-- SEED: showtime_seats — AVAILABLE cho tất cả suất chiếu
+-- ============================================================
+INSERT INTO showtime_seats (showtime_id, seat_id, status)
+SELECT st.id, s.id, 'AVAILABLE'
+FROM show_times st
+JOIN seats s ON s.room_id = st.room_id
+ORDER BY st.id, s.id;

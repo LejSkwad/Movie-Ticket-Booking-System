@@ -30,11 +30,6 @@ public class ShowTimeController {
         return ResponseEntity.ok(ApiResponse.ok(showTimeService.getUpcomingShowTimes(getUpComingShowTimeRequest)));
     }
 
-    @GetMapping("/api/showtimes/{id}/seats")
-    public ResponseEntity<ApiResponse<List<ShowTimeSeatResponse>>> getShowTimeSeats(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(showTimeSeatService.getSeatsByShowTimeId(id)));
-    }
-
     //================================ ADMIN ===========================================
     @GetMapping("/api/admin/showtimes")
     public ResponseEntity<ApiResponse<List<ShowTimeResponse>>> getAdminShowTimes(
@@ -51,5 +46,11 @@ public class ShowTimeController {
     public ResponseEntity<ApiResponse<Void>> deleteShowTime(@PathVariable Long id) {
         showTimeService.deleteShowTime(id);
         return ResponseEntity.ok(ApiResponse.ok(null, "Xóa suất chiếu thành công"));
+    }
+
+    //=============================== INTERNAL =======================================
+    @GetMapping("/internal/showtimes/{id}/seats")
+    public ResponseEntity<ApiResponse<List<ShowTimeSeatResponse>>> getShowTimeSeats(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(showTimeSeatService.getSeatsByShowTimeId(id)));
     }
 }

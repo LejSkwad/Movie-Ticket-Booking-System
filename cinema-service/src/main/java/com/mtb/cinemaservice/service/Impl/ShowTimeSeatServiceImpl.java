@@ -32,29 +32,7 @@ public class ShowTimeSeatServiceImpl implements ShowTimeSeatService {
 
     @Override
     public List<ShowTimeSeatResponse> getSeatsByShowTimeId(Long showTimeId) {
-        if (!showTimeRepository.existsById(showTimeId)) {
-            throw new ShowTimeNotFoundException();
-        }
 
-        Map<SeatType, BigDecimal> priceMap = seatPriceConfigRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(SeatPriceConfig::getSeatType, SeatPriceConfig::getPrice));
-
-        return showTimeSeatRepository.findAllByShowTimeIdWithSeat(showTimeId)
-                .stream()
-                .map(ss -> toResponse(ss, priceMap))
-                .collect(Collectors.toList());
-    }
-
-    private ShowTimeSeatResponse toResponse(ShowTimeSeat ss, Map<SeatType, BigDecimal> priceMap) {
-        ShowTimeSeatResponse res = new ShowTimeSeatResponse();
-        res.setSeatId(ss.getSeat().getId());
-        res.setRowLabel(ss.getSeat().getRowLabel());
-        res.setColNumber(ss.getSeat().getColNumber());
-        res.setSeatType(ss.getSeat().getType().name());
-        res.setPairId(ss.getSeat().getPairId());
-        res.setPrice(priceMap.get(ss.getSeat().getType()));
-        res.setStatus(ss.getStatus().name());
-        return res;
+        return List.of();
     }
 }
