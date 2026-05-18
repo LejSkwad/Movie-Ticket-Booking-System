@@ -1,5 +1,5 @@
 services:
-    # ==================== INFRASTRUCTURE ====================
+  # ==================== INFRASTRUCTURE ====================
   redis:
     image: redis:7-alpine
     container_name: mtb-redis
@@ -7,6 +7,11 @@ services:
       - "6379:6379"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql:
     image: mysql:8.0
@@ -21,61 +26,11 @@ services:
       - ./db:/docker-entrypoint-initdb.d
     networks:
       - backend
-
-  eureka-server:
-    build: ./eureka-server
-    container_name: mtb-eureka
-    ports:
-      - "8761:8761"
-    networks:
-      - backend
-
-  api-gateway:
-    build: ./api-gateway
-    container_name: mtb-gateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - eureka-server
-      - redis
-    environment:
-      - EUREKA_URL=http://eureka-server:8761/eureka/
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
-    networks:
-      - backend
-
-  auth-service:
-    build: ./auth-service
-    container_name: mtb-auth
-    depends_on:
-      - eureka-server
-      - redis
-    environment:
-      - EUREKA_URL=http://eureka-server:8761/eureka/
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
-    networks:
-      - backend
-
-  user-service:
-    build: ./user-service
-    container_name: mtb-user
-    depends_on:
-      - eureka-server
-      - mysql
-    environment:
-      - EUREKA_URL=http://eureka-server:8761/eureka/
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_NAME=mtb_users
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-    networks:
-      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   minio:
     image: minio/minio
@@ -89,6 +44,122 @@ services:
     volumes:
       - minio-data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== PLATFORM ====================
+  eureka-server:
+    build: ./eureka-server
+    container_name: mtb-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/apps"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: mtb-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend
+
+  # ==================== SERVICES ====================
+  auth-service:
+    build: ./auth-service
+    container_name: mtb-auth
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+    networks:
+      - backend
+
+  user-service:
+    build: ./user-service
+    container_name: mtb-user
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - backend
+
+  movie-service:
+    build: ./movie-service
+    container_name: mtb-movie
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=movie-posters
+    networks:
+      - backend
+
+  cinema-service:
+    build: ./cinema-service
+    container_name: mtb-cinema
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     networks:
       - backend
 
